@@ -32,6 +32,7 @@
       const TOGGLE_TODO = "TOGGLE_TODO";
       const ADD_GOAL = "ADD_GOAL";
       const REMOVE_GOAL = "REMOVE_GOAL";
+      const TOGGLE_GOAL = "TOGGLE_TODO";
 
       function addTodoAction(todo) {
         return {
@@ -68,6 +69,13 @@
         };
       }
 
+      function toggleGoalAction(id) {
+        return {
+          type: TOGGLE_GOAL,
+          id,
+        };
+      }
+
       function todos(state = [], action) {
         switch (action.type) {
           case ADD_TODO:
@@ -91,6 +99,12 @@
             return state.concat([action.goal]);
           case REMOVE_GOAL:
             return state.filter((goal) => goal.id !== action.id);
+          case TOGGLE_GOAL:
+            return state.map((goal) =>
+              goal.id !== action.id
+                ? goal
+                : Object.assign({}, goal, { complete: !goal.complete })
+            );
           default:
             return state;
         }
@@ -164,8 +178,9 @@
 
         store.dispatch(
           addGoalAction({
-            id: generateId(),
             name,
+            complete: false,
+            id: generateId(),
           })
         );
       }
@@ -209,6 +224,10 @@
 
         node.appendChild(text);
         node.appendChild(removeBtn);
+        node.style.textDecoration = goal.complete ? "line-through" : "none";
+        node.addEventListener("click", () => {
+          store.dispatch(toggleGoalAction(goal.id));
+        });
 
         document.getElementById("goals").append(node);
       }
